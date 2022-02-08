@@ -1,11 +1,21 @@
 { name = "halogen-project"
 , dependencies =
-  [ "console"
+  [ "aff"
+  , "console"
+  , "const"
+  , "css"
+  , "dom-indexed"
   , "effect"
+  , "either"
   , "halogen"
+  , "halogen-css"
   , "halogen-formless"
+  , "maybe"
+  , "newtype"
   , "prelude"
   , "psci-support"
+  , "strings"
+  , "typelevel-prelude"
   , "uuid"
   ]
 , packages = ./packages.dhall
