@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -12,18 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: olafurpg/setup-scala@v11
+
       - name: Set up Node toolchain
         uses: actions/setup-node@v1
         with:
-          node-version: "12.x"
-
-      - name: Cache PureScript dependencies
-        uses: actions/cache@v2
-        with:
-          key: ${{ runner.os }}-spago-${{ hashFiles('**/*.dhall') }}
-          path: |
-            .spago
-            output
+          node-version: "16.x"
 
       - name: Cache NPM dependencies
         uses: actions/cache@v2
@@ -40,8 +34,5 @@ jobs:
       - name: Install NPM dependencies
         run: npm install
 
-      - name: Build the project
-        run: npm run build
-
-      - name: Run the tests
-        run: npm run test
+      - name: Run tests
+        run: sbt 'scalafmtCheckAll; scalafix --test; test'
