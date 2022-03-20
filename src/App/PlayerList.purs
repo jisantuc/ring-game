@@ -1,16 +1,15 @@
 module App.PlayerList
-  ( Action(..)
-  , State
-  , component
+  ( State
   , playerFormComponent
-  , render
-  ) where
+  )
+  where
 
 import Prelude
 
 import CSS (display, flex)
 import CSS.Flexbox (justifyContent, spaceBetween)
 import DOM.HTML.Indexed.InputType (InputType(..))
+import Data.Array (snoc)
 import Data.Const (Const)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -30,7 +29,8 @@ import Type.Prelude (Proxy(..))
 
 -- track the names of all the players who are participating
 type State =
-  { confirmedPlayers :: Array String
+  { confirmedPlayers :: Array String,
+    pendingPlayer :: String
   }
 
 newtype PlayersEntryForm (r :: Row Type -> Type) f = PlayersEntryForm
@@ -40,7 +40,9 @@ newtype PlayersEntryForm (r :: Row Type -> Type) f = PlayersEntryForm
 
 derive instance Newtype (PlayersEntryForm r f) _
 
-data FormAction = PlayerName String
+data FormAction =
+  ChangePlayerName String
+  | SubmitPlayerName
 
 type FieldConfig :: Symbol -> Type
 type FieldConfig sym =
@@ -59,22 +61,30 @@ minLength n = hoistFnE_ $ \str ->
 
 playerFormComponent :: H.Component (Const Void) Unit Void Aff
 playerFormComponent = H.mkComponent
-  { initialState: const unit
-  , render: const render'
+  { initialState: const { pendingPlayer: "", confirmedPlayers: []}
+  , render: render'
   , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
   }
   where
   handleAction = case _ of
-    PlayerName s -> H.liftEffect $ logShow s
-  render' =
-    HH.slot F._formless unit formComponent unit PlayerName
+    ChangePlayerName s -> logShow s *> (H.modify_ $ \st -> st { pendingPlayer = s }) *> (H.get >>= logShow)
+    SubmitPlayerName -> do
+      st@{ confirmedPlayers, pendingPlayer } <- H.get
+      H.put { confirmedPlayers: confirmedPlayers `snoc` pendingPlayer, pendingPlayer: "" }
+      logShow st
+  render' { confirmedPlayers } =
+    HH.div [ HC.style $ justifyContent spaceBetween ] $
+      [ HH.slot F._formless unit formComponent unit ChangePlayerName
+      , HH.button [ HE.onClick (const SubmitPlayerName) ] [ HH.text "submit" ]
+      , HH.div_ $ HH.text <$> confirmedPlayers ]
 
+  -- TODO: need to figure out how to raise the result here to the parent component
+  -- I _think_ I have to do this with queries, but I don't know how to do that yet,
+  -- but fortunately it's the next section of the book
   formComponent :: F.Component PlayersEntryForm (Const Void) () Unit String Aff
   formComponent = F.component (const formInput) $ F.defaultSpec
     { render = renderFormless
-    , handleEvent = case _ of
-        Submitted (PlayersEntryForm { playerName: OutputField name }) -> logShow $ "submitted" <> name
-        Changed { form: PlayersEntryForm { playerName: FormField { input: i } } } -> logShow $ "changed" <> i
+    , handleEvent = F.raiseResult
     }
     where
     formInput =
@@ -127,39 +137,3 @@ playerFormComponent = H.mkComponent
       where
       help_ str = HH.p [ class_ "help" ] [ HH.text str ]
       helpError_ str = HH.p [ class_ "help is-danger" ] [ HH.text str ]
-
-data Action
-  = AddPlayer
-  | RemovePlayer Int
-  | ConfirmPlayer String
-  | StartGame
-
-renderPlayerList :: forall cs m. State -> H.ComponentHTML Action cs m
-renderPlayerList { confirmedPlayers } = case confirmedPlayers of
-  [] -> HH.div_
-    [ HH.text "No players yet"
-    ]
-  ps -> HH.div_ $ HH.text <$> ps
-
-render :: forall cs m. State -> H.ComponentHTML Action cs m
-render state =
-  HH.div
-    [ HC.style $ justifyContent spaceBetween ]
-    [ HH.p_
-        [ HH.text $ "Who's playing?" ]
-    , renderPlayerList state
-    ]
-
--- handleAction :: forall cs o m. Action → H.HalogenM State Action cs o m Unit
--- handleAction action = case action of
---   SetPlayerName ev -> 
---     H.modify $ \s -> s { pendingPlayer = target ev >>= 
---       \target ->  }
-
-component :: forall q i o m. H.Component q i o m
-component =
-  H.mkComponent
-    { initialState: const { confirmedPlayers: [] }
-    , render
-    , eval: H.mkEval H.defaultEval
-    }
