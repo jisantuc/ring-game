@@ -1,0 +1,19 @@
+.grow {
+    display: flex;
+    flex: 1;
+}
+
+.flex-container {
+    margin: 0.25rem;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}

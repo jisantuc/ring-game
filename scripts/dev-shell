@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+nix develop github:PurpleKingdomGames/tyrian#js
+
