@@ -85,4 +85,9 @@ object render {
     button(onClick(GoHome()))("Home"),
     button(onClick(ShowHelp()))("❓")
   )
+
+  def playRender(players: List[Model.Player], showHelp: Boolean): Html[Msg] =
+    div(
+      "transition successful!"
+    )
 }
