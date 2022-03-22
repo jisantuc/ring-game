@@ -44,10 +44,6 @@ object RingGame extends TyrianApp[Msg, Model]:
               Cmd.Empty
             )
           case StartGame() =>
-            // !! IMPORTANT !!
-            // players should all start with the same number of chips,
-            // even if the config was set differently at the exact moment
-            // they were created
             val equalized = Model.equalizeChips(ap)
             (Model.Play(equalized.players, false), Cmd.Empty)
 
