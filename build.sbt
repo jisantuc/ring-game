@@ -16,8 +16,9 @@ lazy val ringgame =
       scalaVersion := "3.1.1",
       organization := "io.github.jisantuc",
       libraryDependencies ++= Seq(
-        "io.indigoengine" %%% "tyrian" % "0.3.2",
-        "org.scalameta"   %%% "munit"  % "0.7.29" % Test
+        "dev.optics"      %%% "monocle-core" % "3.1.0",
+        "io.indigoengine" %%% "tyrian"       % "0.3.2",
+        "org.scalameta"   %%% "munit"        % "0.7.29" % Test
       ),
       testFrameworks += new TestFramework("munit.Framework"),
       scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
@@ -40,7 +41,11 @@ lazy val ringgame =
       logo := "ring-game (v" + version.value + ")",
       usefulTasks := Seq(
         UsefulTask("", "fastOptJS", "Rebuild the JS (use during development)"),
-        UsefulTask("", "fullOptJS", "Rebuild the JS and optimise (use in production)"),
+        UsefulTask(
+          "",
+          "fullOptJS",
+          "Rebuild the JS and optimise (use in production)"
+        ),
         UsefulTask("", "code", "Launch VSCode")
       ),
       logoColor        := scala.Console.MAGENTA,
