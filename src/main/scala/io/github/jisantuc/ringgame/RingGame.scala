@@ -26,10 +26,8 @@ object RingGame extends TyrianApp[Msg, Model]:
           ),
           Cmd.Empty
         )
-        println(out)
         out
       case UpdatePendingPlayerName(s) =>
-        println(s)
         (
           model.copy(pendingPlayerName = s),
           Cmd.Empty
