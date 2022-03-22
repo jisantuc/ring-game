@@ -56,4 +56,17 @@ class RingGameTests extends munit.FunSuite {
     expectChipsForPlayer(31, p3.id, postPayout)
   }
 
+  test("chip equalization equalizes chip counts") {
+    val players = List(
+      Model.Player(UUID.randomUUID, "p1", 1),
+      Model.Player(UUID.randomUUID, "p2", 20),
+      Model.Player(UUID.randomUUID, "p3", 25)
+    )
+    val equalized =
+      Model.equalizeChips(Model.AddPlayers(players, "", 30, false))
+    equalized.players.map(player =>
+      expectChipsForPlayer(30, player.id, equalized.players)
+    )
+  }
+
 }
