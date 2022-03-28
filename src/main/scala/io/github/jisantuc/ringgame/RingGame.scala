@@ -1,5 +1,6 @@
 package io.github.jisantuc.ringgame
 
+import monocle.syntax.all._
 import tyrian.Html.*
 import tyrian.*
 
@@ -8,6 +9,12 @@ import scala.scalajs.js.annotation.*
 
 @JSExportTopLevel("TyrianApp")
 object RingGame extends TyrianApp[Msg, Model]:
+
+  private def homeTransition(initialChips: Int) =
+    (Model.AddPlayers(Nil, "", initialChips, false), Cmd.Empty)
+
+  private def toggleShowHelp(m: Model) =
+    (Model.setShowHelp(!m.showHelp)(m), Cmd.Empty)
 
   def init(flags: Map[String, String]): (Model, Cmd[Msg]) =
     (Model.AddPlayers(Nil, "", 30, false), Cmd.Empty)
@@ -38,20 +45,35 @@ object RingGame extends TyrianApp[Msg, Model]:
               Cmd.Empty
             )
           case StartGame() =>
-            // !! IMPORTANT !!
-            // players should all start with the same number of chips,
-            // even if the config was set differently at the exact moment
-            // they were created
-            (model, Cmd.Empty)
+            val equalized = Model.equalizeChips(ap)
+            (Model.Play(equalized.players, false), Cmd.Empty)
 
           case GoHome() =>
-            (Model.AddPlayers(Nil, "", ap.initialChips, false), Cmd.Empty)
+            homeTransition(ap.initialChips)
 
           case ShowHelp() =>
-            (Model.setShowHelp(!model.showHelp)(model), Cmd.Empty)
+            toggleShowHelp(model)
 
           case UpdateChipsPerPlayer(n) =>
             (Model.updateChipsPerPlayer(n)(ap), Cmd.Empty)
+          case _ => (ap, Cmd.Empty)
+      case p @ Model.Play(_, _) =>
+        msg match {
+          case GoHome() =>
+            // initialChips doesn't need to be tracked in the play state,
+            // but since chips can be neither created nor destroyed, we know
+            // that this will divide evenly
+            homeTransition(p.players.map(_.chips).sum / p.players.size)
+          case ShowHelp() =>
+            toggleShowHelp(model)
+          case AwardChips(playerId, award) =>
+            (
+              p.focus(_.players)
+                .modify(payout.earnChips(award, playerId, _)),
+              Cmd.Empty
+            )
+          case _ => (p, Cmd.Empty)
+        }
     }
 
   def view(model: Model): Html[Msg] =
@@ -61,6 +83,8 @@ object RingGame extends TyrianApp[Msg, Model]:
       model match {
         case Model.AddPlayers(players, pendingPlayerName, initialChips, _) =>
           render.gameConfigRender(players, pendingPlayerName, initialChips)
+        case Model.Play(players, showHelp) =>
+          render.playRender(players, showHelp)
       }
     )
 
