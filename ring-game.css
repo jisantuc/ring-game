@@ -17,3 +17,13 @@
 .flex-column {
     flex-direction: column;
 }
+
+.player-card {
+    border-color: #000000;
+    border-width: 0.01rem;
+    border-style: solid;
+    padding: 1rem;
+    text-align: center;
+    row-gap: 0.5rem;
+    min-width: 180px;
+}

@@ -86,8 +86,19 @@ object render {
     button(onClick(ShowHelp()))("❓")
   )
 
-  def playRender(players: List[Model.Player], showHelp: Boolean): Html[Msg] =
+  inline private def playerCard(player: Model.Player): Html[Msg] =
     div(
-      "transition successful!"
+      `class` := "flex-container flex-column player-card"
+    )(
+      b(player.name),
+      span(style("font-size", "x-large"))(
+        text(s"${player.chips} chips")
+      ),
+      button(onClick(AwardChips(player.id, 1)))("Award")
+    )
+
+  def playRender(players: List[Model.Player], showHelp: Boolean): Html[Msg] =
+    div(`class` := "flex-container flex-row", style("flex-wrap", "wrap"))(
+      players.map(playerCard(_))
     )
 }

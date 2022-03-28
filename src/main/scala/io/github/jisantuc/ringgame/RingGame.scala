@@ -1,5 +1,6 @@
 package io.github.jisantuc.ringgame
 
+import monocle.syntax.all._
 import tyrian.Html.*
 import tyrian.*
 
@@ -55,6 +56,7 @@ object RingGame extends TyrianApp[Msg, Model]:
 
           case UpdateChipsPerPlayer(n) =>
             (Model.updateChipsPerPlayer(n)(ap), Cmd.Empty)
+          case _ => (ap, Cmd.Empty)
       case p @ Model.Play(_, _) =>
         msg match {
           case GoHome() =>
@@ -64,6 +66,12 @@ object RingGame extends TyrianApp[Msg, Model]:
             homeTransition(p.players.map(_.chips).sum / p.players.size)
           case ShowHelp() =>
             toggleShowHelp(model)
+          case AwardChips(playerId, award) =>
+            (
+              p.focus(_.players)
+                .modify(payout.earnChips(award, playerId, _)),
+              Cmd.Empty
+            )
           case _ => (p, Cmd.Empty)
         }
     }
