@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/js/add-ghpages-publication
 
 jobs:
   release:
