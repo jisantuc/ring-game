@@ -11,3 +11,4 @@ final case class GoHome()                                extends Msg
 final case class ShowHelp()                              extends Msg
 final case class UpdateChipsPerPlayer(diff: Int)         extends Msg
 final case class AwardChips(playerId: UUID, nChips: Int) extends Msg
+case object NoOp                                         extends Msg

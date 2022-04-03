@@ -1,10 +1,8 @@
-.grow {
+.flex {
     display: flex;
-    flex: 1;
 }
 
 .flex-container {
-    margin: 0.25rem;
     display: flex;
     flex: 1;
     justify-content: space-between;
@@ -22,8 +20,32 @@
     border-color: #000000;
     border-width: 0.01rem;
     border-style: solid;
-    padding: 1rem;
     text-align: center;
     row-gap: 0.5rem;
     min-width: 180px;
+    padding: 0;
+}
+
+.player-input-line {
+    flex: 7;
+}
+
+.player-submit-button {
+    margin-left: 0.25rem;
+}
+
+.big-text {
+    font-size: xx-large;
+}
+
+.chip-count-config {
+    padding: 0.5rem;
+}
+
+body {
+    margin: 0.75rem;
+}
+
+.padded {
+    padding: 1rem;
 }
