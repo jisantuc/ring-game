@@ -56,7 +56,9 @@ object RingGame extends TyrianApp[Msg, Model]:
 
           case UpdateChipsPerPlayer(n) =>
             (Model.updateChipsPerPlayer(n)(ap), Cmd.Empty)
-          case _ => (ap, Cmd.Empty)
+          // AwardChips doesn't make sense in the player form state
+          // NoOp should always do nothing
+          case NoOp | AwardChips(_, _) => (ap, Cmd.Empty)
       case p @ Model.Play(_, _) =>
         msg match {
           case GoHome() =>
@@ -72,7 +74,11 @@ object RingGame extends TyrianApp[Msg, Model]:
                 .modify(payout.earnChips(award, playerId, _)),
               Cmd.Empty
             )
-          case _ => (p, Cmd.Empty)
+          // lol @ scalafmt :(
+          case AddPlayer() | UpdatePendingPlayerName(_) | RemovePlayer(
+                _
+              ) | StartGame() | UpdateChipsPerPlayer(_) | NoOp =>
+            (p, Cmd.Empty)
         }
     }
 

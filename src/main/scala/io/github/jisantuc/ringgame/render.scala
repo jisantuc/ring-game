@@ -1,39 +1,54 @@
 package io.github.jisantuc.ringgame
 
+// import tyrian.KeyboardEvent
 import tyrian.Attr
 import tyrian.Html
 import tyrian.Html.*
 
 object render {
   private def newPlayerFormLine(pendingPlayerName: String): Html[Msg] =
-    div(`class` := "flex-container flex-row")(
+    div(`class` := "flex-container flex-row padded")(
       input[Msg](
-        `class`     := "grow",
+        `class`     := "flex player-input-line big-text padded",
         placeholder := "player name",
-        onInput(UpdatePendingPlayerName(_))
+        onInput(UpdatePendingPlayerName(_)),
+        onKeyUp {
+          case event if event.key == "Enter" =>
+            AddPlayer()
+          case _ => NoOp
+        }
       ),
       button(
+        `class` := "player-submit-button padded",
         onClick(AddPlayer()),
-        disabled(pendingPlayerName.isEmpty),
-        style("margin-left", "0.25rem")
+        disabled(pendingPlayerName.isEmpty)
       )(
         text("➕")
       )
     )
 
   private def renderPlayerLine(player: Model.Player): Html[Msg] =
-    div(`class` := "flex-container flex-row")(
+    div(`class` := "flex-container flex-row big-text padded")(
       text(player.name),
       button(onClick(RemovePlayer(player.id)))(text("❌"))
     )
 
   private def initialChipsConfig(chips: Int): Html[Msg] =
-    div(`class` := "flex-container flex-row")(
+    div(`class` := "flex-container flex-row big-text padded")(
       text("Initial chips per player:"),
-      div(style("max-width", "60px"), `class` := "flex-container flex-row")(
-        button(onClick(UpdateChipsPerPlayer(-1)))("-"),
+      div(
+        style("max-width", "10rem"),
+        `class` := "flex-container flex-row padded"
+      )(
+        button(
+          `class` := "chip-count-config padded",
+          onClick(UpdateChipsPerPlayer(-1))
+        )("➖"),
         text(chips.toString),
-        button(onClick(UpdateChipsPerPlayer(1)))("+")
+        button(
+          `class` := "chip-count-config padded",
+          onClick(UpdateChipsPerPlayer(1))
+        )("➕")
       )
     )
 
@@ -42,12 +57,12 @@ object render {
       pendingPlayerName: String,
       initialChips: Int
   ): Html[Msg] =
-    div(`class` := "flex-container flex-column")(
+    div(`class` := "flex-container flex-column padded")(
       initialChipsConfig(initialChips) +:
         players.map(renderPlayerLine) :+
         newPlayerFormLine(pendingPlayerName) :+
         button(
-          `class` := "player-form-submit",
+          `class` := "player-form-submit big-text padded",
           onClick(StartGame()),
           disabled(players.size < 3)
         )(
@@ -56,7 +71,7 @@ object render {
     )
 
   def help(v: Boolean): Html[Msg] =
-    div(`class` := "help-text", hidden(!v))(
+    div(`class` := "help-text big-text padded", hidden(!v))(
       p(
         text("""
     | A ring game is a game of pool played with more than two people in
@@ -81,24 +96,27 @@ object render {
       )
     )
 
-  def topBar: Html[Msg] = div(`class` := "flex-container flex-row")(
-    button(onClick(GoHome()))("Home"),
-    button(onClick(ShowHelp()))("❓")
+  def topBar: Html[Msg] = div(`class` := "flex-container flex-row padded")(
+    button(`class` := "big-text padded", onClick(GoHome()))("Home"),
+    button(`class` := "big-text padded", onClick(ShowHelp()))("❓")
   )
 
   inline private def playerCard(player: Model.Player): Html[Msg] =
     div(
-      `class` := "flex-container flex-column player-card"
+      `class` := "flex-container flex-column player-card padded"
     )(
-      b(player.name),
-      span(style("font-size", "x-large"))(
-        text(s"${player.chips} chips")
-      ),
-      button(onClick(AwardChips(player.id, 1)))("Award")
+      h1(`class` := "big-text padded")(player.name),
+      h3(`class` := "big-text padded")(s"${player.chips} chips"),
+      button(`class` := "big-text padded", onClick(AwardChips(player.id, 1)))(
+        "Award"
+      )
     )
 
   def playRender(players: List[Model.Player], showHelp: Boolean): Html[Msg] =
-    div(`class` := "flex-container flex-row", style("flex-wrap", "wrap"))(
+    div(
+      `class` := "flex-container flex-column padded",
+      style("flex-wrap", "wrap")
+    )(
       players.map(playerCard(_))
     )
 }
