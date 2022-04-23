@@ -41,12 +41,12 @@ object render {
         `class` := "flex-container flex-row padded"
       )(
         button(
-          `class` := "chip-count-config padded",
+          `class` := "chip-count-config padded tappable",
           onClick(UpdateChipsPerPlayer(-1))
         )("➖"),
         text(chips.toString),
         button(
-          `class` := "chip-count-config padded",
+          `class` := "chip-count-config padded tappable",
           onClick(UpdateChipsPerPlayer(1))
         )("➕")
       )
@@ -101,22 +101,37 @@ object render {
     button(`class` := "big-text padded", onClick(ShowHelp()))("❓")
   )
 
-  inline private def playerCard(player: Model.Player): Html[Msg] =
+  inline private def playerCard(
+      player: Model.Player,
+      totalChips: Int,
+      initialChips: Int
+  ): Html[Msg] =
     div(
-      `class` := "flex-container flex-column player-card padded"
+      `class` := "flex-container flex-column player-card"
     )(
       h1(`class` := "big-text padded")(player.name),
       h3(`class` := "big-text padded")(s"${player.chips} chips"),
-      button(`class` := "big-text padded", onClick(AwardChips(player.id, 1)))(
+      chart.countingLineChart(totalChips, initialChips, player.history),
+      button(
+        `class` := "big-text padded tappable award-button",
+        onClick(AwardChips(player.id, 1))
+      )(
         "Award"
       )
     )
 
-  def playRender(players: List[Model.Player], showHelp: Boolean): Html[Msg] =
+  def playRender(
+      players: List[Model.Player],
+      initialChips: Int,
+      showHelp: Boolean
+  ): Html[Msg] =
+    val totalChips = players.map(_.chips).sum
     div(
       `class` := "flex-container flex-column padded",
       style("flex-wrap", "wrap")
     )(
-      players.map(playerCard(_))
+      div(
+        players.map(playerCard(_, totalChips, initialChips))
+      )
     )
 }

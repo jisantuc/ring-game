@@ -20,13 +20,15 @@ object Model {
 
   final case class Play(
       players: List[Player],
+      initialChips: Int,
       showHelp: Boolean
   ) extends Model
 
   final case class Player(
       id: UUID,
       name: String,
-      chips: Int
+      chips: Int,
+      history: List[Int]
   )
 
   final case class PendingPlayer(
@@ -39,7 +41,7 @@ object Model {
     {
       case ap @ AddPlayers(_, _, _, _) =>
         ap.copy(showHelp = b)
-      case p @ Play(_, _) => p.copy(showHelp = b)
+      case p @ Play(_, _, _) => p.copy(showHelp = b)
     }
   }
 

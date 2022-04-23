@@ -18,9 +18,9 @@ class RingGameTests extends munit.FunSuite {
     )
 
   val richPlayers = List(
-    Model.Player(UUID.randomUUID, "p1", 30),
-    Model.Player(UUID.randomUUID, "p2", 30),
-    Model.Player(UUID.randomUUID, "p3", 30)
+    Model.Player(UUID.randomUUID, "p1", 30, Nil),
+    Model.Player(UUID.randomUUID, "p2", 30, Nil),
+    Model.Player(UUID.randomUUID, "p3", 30, Nil)
   )
 
   val p1 = richPlayers(0)
@@ -40,9 +40,9 @@ class RingGameTests extends munit.FunSuite {
 
   test("bankrupt one player") {
     val players = List(
-      Model.Player(UUID.randomUUID, "p1", 1),
-      Model.Player(UUID.randomUUID, "p2", 20),
-      Model.Player(UUID.randomUUID, "p3", 25)
+      Model.Player(UUID.randomUUID, "p1", 1, Nil),
+      Model.Player(UUID.randomUUID, "p2", 20, Nil),
+      Model.Player(UUID.randomUUID, "p3", 25, Nil)
     )
 
     val p1 = players(0)
@@ -58,14 +58,58 @@ class RingGameTests extends munit.FunSuite {
 
   test("chip equalization equalizes chip counts") {
     val players = List(
-      Model.Player(UUID.randomUUID, "p1", 1),
-      Model.Player(UUID.randomUUID, "p2", 20),
-      Model.Player(UUID.randomUUID, "p3", 25)
+      Model.Player(UUID.randomUUID, "p1", 1, Nil),
+      Model.Player(UUID.randomUUID, "p2", 20, Nil),
+      Model.Player(UUID.randomUUID, "p3", 25, Nil)
     )
     val equalized =
       Model.equalizeChips(Model.AddPlayers(players, "", 30, false))
     equalized.players.map(player =>
       expectChipsForPlayer(30, player.id, equalized.players)
+    )
+  }
+
+  test("earning chips preserves history") {
+    val players = List(
+      Model.Player(UUID.randomUUID, "p1", 1, Nil),
+      Model.Player(UUID.randomUUID, "p2", 20, Nil),
+      Model.Player(UUID.randomUUID, "p3", 25, Nil)
+    )
+
+    val p1 = players(0)
+    val p2 = players(1)
+
+    val postPayout  = payout.earnChips(1, p1.id, players)
+    val postPayout2 = payout.earnChips(1, p2.id, postPayout)
+
+    // we should append to an empty history
+    assertEquals(
+      postPayout.map(_.history),
+      List(
+        List(3),
+        List(19),
+        List(24)
+      )
+    )
+
+    // we should append correct values to a nonempty history
+    assertEquals(
+      postPayout2.map(_.history),
+      List(
+        List(3, 2),
+        List(19, 21),
+        List(24, 23)
+      )
+    )
+
+    // numbers of chips should also be correct
+    assertEquals(
+      postPayout2.map(_.chips),
+      List(
+        2,
+        21,
+        23
+      )
     )
   }
 

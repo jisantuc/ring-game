@@ -29,7 +29,8 @@ object RingGame extends TyrianApp[Msg, Model]:
                 Model.Player(
                   UUID.randomUUID,
                   ap.pendingPlayerName,
-                  ap.initialChips
+                  ap.initialChips,
+                  Nil
                 )
               )(ap),
               Cmd.Empty
@@ -46,7 +47,7 @@ object RingGame extends TyrianApp[Msg, Model]:
             )
           case StartGame() =>
             val equalized = Model.equalizeChips(ap)
-            (Model.Play(equalized.players, false), Cmd.Empty)
+            (Model.Play(equalized.players, ap.initialChips, false), Cmd.Empty)
 
           case GoHome() =>
             homeTransition(ap.initialChips)
@@ -59,7 +60,7 @@ object RingGame extends TyrianApp[Msg, Model]:
           // AwardChips doesn't make sense in the player form state
           // NoOp should always do nothing
           case NoOp | AwardChips(_, _) => (ap, Cmd.Empty)
-      case p @ Model.Play(_, _) =>
+      case p @ Model.Play(_, _, _) =>
         msg match {
           case GoHome() =>
             // initialChips doesn't need to be tracked in the play state,
@@ -89,8 +90,8 @@ object RingGame extends TyrianApp[Msg, Model]:
       model match {
         case Model.AddPlayers(players, pendingPlayerName, initialChips, _) =>
           render.gameConfigRender(players, pendingPlayerName, initialChips)
-        case Model.Play(players, showHelp) =>
-          render.playRender(players, showHelp)
+        case Model.Play(players, initialChips, showHelp) =>
+          render.playRender(players, initialChips, showHelp)
       }
     )
 
