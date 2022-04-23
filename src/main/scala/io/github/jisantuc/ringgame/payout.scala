@@ -15,7 +15,15 @@ object payout {
       else acc + (chipsEarned `min` player.chips)
     )
     players.map { player =>
-      if player.id == earningPlayer then player.focus(_.chips).modify(_ + pot)
-      else player.focus(_.chips).modify(chips => (chips - chipsEarned) `max` 0)
+      val withPayout =
+        if player.id == earningPlayer then
+          player
+            .focus(_.chips)
+            .modify(_ + pot)
+        else
+          player
+            .focus(_.chips)
+            .modify(chips => (chips - chipsEarned) `max` 0)
+      withPayout.focus(_.history).modify(history => history :+ withPayout.chips)
     }
 }
